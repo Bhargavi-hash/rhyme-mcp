@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from supabase import create_client
 import time
+import requests
 
 load_dotenv()
 
@@ -287,16 +288,11 @@ def create_profiles(count=35):
     usernames_shuffled = random.sample(USERNAMES, min(count, len(USERNAMES)))
 
     for i in range(count):
-        profile_id = str(uuid.uuid4())
         username = usernames_shuffled[i]
         display_name = DISPLAY_NAMES[i % len(DISPLAY_NAMES)]
         bio = random.choice(BIOS)
         signup_date = random_date(days_back_min=60, days_back_max=365)
 
-        # User type distribution — realistic
-        # Power users: high poem count
-        # Regular: moderate
-        # Lurkers: low
         user_type = random.choices(
             ["power", "regular", "lurker"],
             weights=[15, 45, 40]
@@ -316,9 +312,33 @@ def create_profiles(count=35):
 
         points = random.randint(0, 500)
 
+        # Step 1 — create auth user
+        email = f"{username}@poetryquill-demo.com"
+        auth_response = requests.post(
+            f"{os.environ['SUPABASE_URL']}/auth/v1/admin/users",
+            headers={
+                "apikey": os.environ["SUPABASE_KEY"],
+                "Authorization": f"Bearer {os.environ['SUPABASE_KEY']}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "email": email,
+                "password": "SimulatedUser123!",
+                "email_confirm": True,
+            }
+        )
+
+        if auth_response.status_code != 200:
+            print(f"  ✗ Auth failed @{username}: {auth_response.json().get('message', auth_response.text)}")
+            time.sleep(0.2)
+            continue
+
+        auth_user_id = auth_response.json()["id"]
+
+        # Step 2 — insert profile
         try:
-            result = supabase.table("profiles").insert({
-                "id": profile_id,
+            result = supabase.table("profiles").upsert({
+                "id": auth_user_id,
                 "username": username,
                 "display_name": display_name,
                 "bio": bio,
@@ -332,20 +352,19 @@ def create_profiles(count=35):
                 "country": random.choice(COUNTRIES),
                 "created_at": signup_date,
                 "updated_at": signup_date,
-            }).execute()
+            }, on_conflict="id").execute()
 
             if result.data:
-                profile_ids.append(profile_id)
+                profile_ids.append(auth_user_id)
                 print(f"  ✓ [{user_type:7}] @{username}")
 
         except Exception as e:
-            print(f"  ✗ Failed @{username}: {e}")
+            print(f"  ✗ Profile failed @{username}: {e}")
 
-        time.sleep(0.08)
+        time.sleep(0.15)  # slightly slower — auth API has rate limits
 
     print(f"\n  → Created {len(profile_ids)}/{count} profiles")
     return profile_ids
-
 
 # ── STEP 2: CREATE POEMS ─────────────────────────────────────
 
@@ -629,4 +648,3 @@ if __name__ == "__main__":
     print(f"  Follows:     ~80")
     print(f"  Collections: 15")
     print("="*50 + "\n")
-    
