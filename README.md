@@ -1,23 +1,23 @@
-# PoetryQuill Analytics MCP
+# Rhyme Analytics MCP
 
-An MCP server that connects Claude Desktop to PoetryQuill's live Supabase database.
+An MCP server that connects Claude Desktop to Rhyme's live Supabase database.
 Ask Claude natural language questions about your platform data.
 
 ## Setup
 
 ### 1. Install dependencies
-pip install mcp supabase python-dotenv
+```pip install mcp supabase python-dotenv```
 
 ### 2. Configure credentials
-cp .env.example .env
+```cp .env.example .env```
 # Edit .env and add your Supabase URL and service role key
 
 ### 3. Run the simulator (optional — adds realistic demo data)
-python simulate_poetryquill.py
+```python simulate.py```
 
 ### 4. Connect to Claude Desktop
 Add to ~/.config/Claude/claude_desktop_config.json:
-
+```
 {
   "mcpServers": {
     "poetryquill": {
@@ -26,7 +26,7 @@ Add to ~/.config/Claude/claude_desktop_config.json:
     }
   }
 }
-
+```
 ### 5. Restart Claude Desktop
 Look for the hammer icon — your tools are connected.
 
@@ -59,6 +59,6 @@ Look for the hammer icon — your tools are connected.
 | get_geographic_distribution | Where users are from |
 
 ## Schema
-Built for PoetryQuill's Supabase schema:
+Built for Rhyme's Supabase schema:
 profiles, poems, likes, comments, follows, collections, collection_poems
 
