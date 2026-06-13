@@ -44,7 +44,7 @@ def get_platform_overview():
     new_poems_30 = supabase.table("poems").select("*", count="exact").gte("created_at", cutoff_30).filter("is_published", "eq", True).execute()
 
     return {
-        "platform": "PoetryQuill",
+        "platform": "Rhyme",
         "totals": {
             "users": total_users.count,
             "published_poems": total_poems.count,
@@ -243,7 +243,7 @@ async def ask(query: Query):
             model="claude-sonnet-4-6",
             max_tokens=4096,
             system=(
-                "You are an analytics assistant for PoetryQuill, a poetry writing platform. "
+                "You are an analytics assistant for Rhyme, a poetry writing platform. "
                 "Use the available tools to answer questions about the platform's data. "
                 "Always use tools to get real data rather than guessing. "
                 "Present insights clearly and highlight interesting patterns."
@@ -428,14 +428,14 @@ async def home():
 <body>
 
 <div class="header">
-  <h1>PoetryQuill Analytics</h1>
+  <h1>Rhyme Analytics</h1>
   <p>Ask Claude anything about your platform data</p>
 </div>
 
 <div class="chat-box">
   <div class="messages" id="messages">
     <div class="message assistant">
-      Hi! I'm connected to PoetryQuill's live database.
+      Hi! I'm connected to Rhyme's live database.
       Ask me anything about your platform — users, poems, engagement trends, 
       popular content, writing streaks, or geographic distribution.
     </div>
